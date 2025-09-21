@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>连接陶水管</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        
+        body {
+            font-family: 'SimSun', '宋体', serif;
+            background: linear-gradient(to bottom, #D6C6A5, #C4B28D);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #5C4A3E;
+            position: relative;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #5C4A3E;
+            text-shadow: 1px 1px 3px rgba(92, 74, 62, 0.2);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            letter-spacing: 4px;
+            font-weight: normal;
+        }
+        
+        /* 图片上传展示区样式 */
+        .pipe-image-upload {
+            width: 100%;
+            max-width: 900px;
+            background-color: rgba(210, 196, 176, 0.7);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #8C7B6B;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .upload-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-align: center;
+            color: #5C4A3E;
+        }
+        
+        .image-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .image-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .image-preview {
+            width: 120px;
+            height: 120px;
+            border: 2px dashed #8C7B6B;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.5);
+            overflow: hidden;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .image-placeholder {
+            font-size: 0.9rem;
+            color: #7D6C5E;
+            text-align: center;
+            line-height: 1.3;
+        }
+        
+        .image-upload-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            background: linear-gradient(to bottom, #8C7B6B, #6D5D4F);
+            color: #F5F1E6;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .image-upload-btn:hover {
+            background: linear-gradient(to bottom, #9D8B7A, #7D6C5E);
+            transform: translateY(-1px);
+        }
+        
+        .level-info {
+            background-color: rgba(163, 145, 125, 0.8);
+            color: #F5F1E6;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #8C7B6B;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+        }
+        
+        .pipes-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 15px;
+            background-color: rgba(163, 145, 125, 0.5);
+            border-radius: 8px;
+            border: 1px solid #8C7B6B;
+        }
+        
+        .pipe-item {
+            width: 80px;
+            height: 80px;
+            background-color: #8C7B6B;
+            border: 2px solid #5C4A3E;
+            border-radius: 5px;
+            cursor: grab;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .pipe-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .pipe-item::after {
+            content: attr(data-count);
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            background-color: #D4AF37;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: #5C4A3E;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .board-container {
+            position: relative;
+            background-color: #A3917D;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(92, 74, 62, 0.4);
+            border: 2px solid #8C7B6B;
+        }
+        
+        .background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, rgba(139, 125, 107, 0.1) 1px, transparent 1px),
+                linear-gradient(rgba(139, 125, 107, 0.1) 1px, transparent 1px),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%239C8575" width="100" height="100"/></svg>');
+            background-size: 20px 20px, 20px 20px, auto;
+            opacity: 0.4;
+            z-index: 1;
+        }
+        
+        .game-board {
+            position: relative;
+            display: grid;
+            grid-gap: 4px;
+            padding: 12px;
+            z-index: 2;
+        }
+        
+        .cell {
+            aspect-ratio: 1/1;
+            background-color: rgba(210, 196, 176, 0.4);
+            border-radius: 3px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #8C7B6B;
+        }
+        
+        .cell.empty {
+            background-color: rgba(210, 196, 176, 0.2);
+        }
+        
+        .cell.placed {
+            background-color: rgba(163, 145, 125, 0.6);
+        }
+        
+        .cell.obstacle {
+            background-color: rgba(101, 79, 64, 0.6);
+            cursor: not-allowed;
+        }
+        
+        /* 管道样式统一管理，使用自定义上传图片 */
+        .pipe {
+            width: 80%;
+            height: 80%;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .obstacle {
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: grayscale(70%);
+        }
+        
+        /* 水源 */
+        .water-source {
+            background-color: #7D9EA8;
+            border-radius: 50%;
+            width: 70%;
+            height: 70%;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #5C7984;
+        }
+        
+        .water-source::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, #8FB0BB, #6D8D98);
+            border-radius: 50%;
+        }
+        
+        /* 终点 */
+        .end-point {
+            background-color: #8C7B6B;
+            border-radius: 50%;
+            width: 70%;
+            height: 70%;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #5C4A3E;
+            box-shadow: 0 0 10px rgba(70, 55, 45, 0.6);
+        }
+        
+        .end-point::after {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            background: radial-gradient(circle at 30% 30%, #9D8B7A, #7D6C5E);
+            border-radius: 50%;
+            border: 1px solid #5C4A3E;
+        }
+        
+        /* 控制区域 */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            background: linear-gradient(to bottom, #8C7B6B, #6D5D4F);
+            color: #F5F1E6;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            border: 1px solid #5C4A3E;
+            font-family: 'SimSun', '宋体', serif;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to bottom, #9D8B7A, #7D6C5E);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .instructions {
+            background-color: rgba(210, 196, 176, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            max-width: 900px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #8C7B6B;
+            color: #5C4A3E;
+        }
+        
+        .instructions h2 {
+            color: #5C4A3E;
+            margin-bottom: 10px;
+            font-weight: normal;
+            text-align: center;
+            border-bottom: 1px solid #D6C6A5;
+            padding-bottom: 5px;
+        }
+        
+        .instructions p {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .rotation-indicator {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 15px;
+            height: 15px;
+            background-color: #D4AF37;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5C4A3E;
+            font-weight: bold;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            background-color: rgba(163, 145, 125, 0.8);
+            color: #F5F1E6;
+            display: none;
+        }
+        
+        .ancient-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.05;
+            background: 
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="%235C4A3E" d="M20,20 C30,10 70,10 80,20 C90,30 90,70 80,80 C70,90 30,90 20,80 C10,70 10,30 20,20 Z"/></svg>');
+            background-size: 200px 200px;
+            z-index: 3;
+        }
+        
+        .drag-over {
+            background-color: rgba(125, 158, 168, 0.3) !important;
+            border: 2px dashed #5C7984 !important;
+        }
+        
+        .remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 16px;
+            height: 16px;
+            background-color: #c1666b;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: white;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 10;
+        }
+        
+        .cell.placed:hover .remove-btn {
+            opacity: 1;
+        }
+        
+        /* 通关弹窗样式 */
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        /* 调整特效位置到屏幕上方，确保不被弹窗遮挡 */
+        .success-effect {
+            position: absolute;
+            top: 15%; /* 上移至屏幕上方15%位置 */
+            font-size: 6rem;
+            font-weight: bold;
+            color: rgba(212, 175, 55, 0.9);
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.7), 0 0 40px rgba(212, 175, 55, 0.5);
+            z-index: 999; /* 低于弹窗内容 */
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            /* 动画只播放一次，然后保持最终状态 */
+            animation: 
+                expand 1.5s ease-in-out forwards, /* forwards使动画停留在最后一帧 */
+                flash 1.5s ease-in-out forwards;
+        }
+        
+        /* 弹窗显示时，同步显示特效 */
+        .success-modal.show .success-effect {
+            opacity: 1;
+        }
+        
+        .success-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background-color: #F5F1E6;
+            border-radius: 10px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid #8C7B6B;
+            position: relative;
+            transform: translateY(-20px);
+            transition: transform 0.5s ease;
+            z-index: 1001; /* 确保在特效之上 */
+            background-clip: padding-box;
+        }
+        
+        .success-modal.show .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-title {
+            color: #5C4A3E;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #D6C6A5;
+        }
+        
+        .modal-message {
+            color: #5C4A3E;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            min-height: 60px;
+        }
+        
+        .next-level-btn {
+            background: linear-gradient(to bottom, #7D9EA8, #5C7984);
+            color: #F5F1E6;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .next-level-btn:hover {
+            background: linear-gradient(to bottom, #8FB0BB, #6D8D98);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 通关特效动画（只播放一次） */
+        @keyframes expand {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; } /* 最终状态保持正常大小 */
+        }
+        
+        @keyframes flash {
+            0%, 100% {
+                text-shadow: 0 0 25px rgba(212, 175, 55, 0.8), 0 0 50px rgba(212, 175, 55, 0.6);
+            }
+            50% {
+                text-shadow: 0 0 40px rgba(212, 175, 55, 1), 0 0 80px rgba(212, 175, 55, 0.8), 0 0 100px rgba(212, 175, 55, 0.6);
+            }
+        }
+        
+        /* 响应式适配 */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .pipes-container {
+                gap: 15px;
+            }
+            
+            .pipe-item {
+                width: 60px;
+                height: 60px;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .image-preview {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .image-container {
+                gap: 15px;
+            }
+            
+            .modal-title {
+                font-size: 1.6rem;
+            }
+            
+            .modal-message {
+                font-size: 1rem;
+            }
+            
+            .success-effect {
+                font-size: 3rem;
+                top: 10%; /* 小屏幕上稍微调整位置 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>连接陶水管</h1>
+        <div class="pipe-image-upload">
+            <div class="upload-title">自定义管道与障碍图片</div>
+            <div class="image-container">
+                <div class="image-item">
+                    <div class="image-preview" id="straightPreview">
+                        <div class="image-placeholder">
+                            点击上传<br>直管图片
+                        </div>
+                    </div>
+                    <button class="image-upload-btn" onclick="document.getElementById('straightUpload').click()">
+                        选择图片
+                    </button>
+                    <input type="file" id="straightUpload" accept="image/*" style="display: none;"
+                           onchange="handleImageUpload('straight', this)">
+                </div>
+                
+                <div class="image-item">
+                    <div class="image-preview" id="curvedPreview">
+                        <div class="image-placeholder">
+                            点击上传<br>弯管图片
+                        </div>
+                    </div>
+                    <button class="image-upload-btn" onclick="document.getElementById('curvedUpload').click()">
+                        选择图片
+                    </button>
+                    <input type="file" id="curvedUpload" accept="image/*" style="display: none;"
+                           onchange="handleImageUpload('curved', this)">
+                </div>
+                
+                <div class="image-item">
+                    <div class="image-preview" id="obstaclePreview">
+                        <div class="image-placeholder">
+                            点击上传<br>障碍图片
+                        </div>
+                    </div>
+                    <button class="image-upload-btn" onclick="document.getElementById('obstacleUpload').click()">
+                        选择图片
+                    </button>
+                    <input type="file" id="obstacleUpload" accept="image/*" style="display: none;"
+                           onchange="handleImageUpload('obstacle', this)">
+                </div>
+            </div>
+        </div>
+        <div class="level-info" id="levelInfo">关卡 1/10 - 可用管道: 12 - 障碍: 2</div>
+    </header>
+    
+    <div class="game-container">
+        <div class="pipes-container" id="pipesContainer">
+            <!-- 管道选项将通过JavaScript动态生成 -->
+        </div>
+        
+        <div class="board-container">
+            <div class="background"></div>
+            <div class="ancient-pattern"></div>
+            <div class="game-board" id="gameBoard">
+                <!-- 游戏网格将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button id="checkBtn">检查连通</button>
+        <button id="resetBtn">重置关卡</button>
+        <button id="prevBtn" disabled>上一关</button>
+    </div>
+    
+    <div class="status-message" id="statusMessage"></div>
+    
+    <div class="instructions">
+        <h2>游戏说明</h2>
+        <p>1. 先在顶部上传直管、弯管和障碍图片。（支持JPG、PNG等常见图片格式）</p>
+        <p>2. 拖放管道到网格中的任意单元格。（起点、终点和障碍除外）</p>
+        <p>3. 点击管道可以旋转其方向。（每次90°）</p>
+        <p>4. 点击单元格右上角的×可以移除管道。</p>
+        <p>5. 连接管道形成从起点到终点的完整水路，避开障碍。</p>
+        <p>6. 每关都有多种可行路径，尝试找到最优解！</p>
+        <p>7. 点击"检查连通"验证是否成功连接。</p>
+    </div>
+    
+    <!-- 通关弹窗 -->
+    <div class="success-modal" id="successModal">
+        <div class="success-effect">恭喜通关</div>
+        <div class="modal-content">
+            <div class="modal-title">恭喜通关</div>
+            <div class="modal-message" id="modalMessage">你成功连接了陶水管，让水流得以畅通！</div>
+            <button class="next-level-btn" id="modalNextBtn">点击进入下一关</button>
+        </div>
+    </div>
+
+    <script>
+        // 存储上传的管道和障碍图片URL
+        const pipeImages = {
+            straight: null,  // 直管图片URL
+            curved: null,    // 弯管图片URL
+            obstacle: null   // 障碍图片URL
+        };
+
+        // 关卡自定义消息
+        const levelMessages = [
+            "汉代陶水管是汉代城市排水系统的重要组成部分。",
+            "它主要采用泥质灰陶制成，多为圆形陶管。",
+            "它采用泥条盘筑或模制成型，呈直筒状。",
+            "陶水管表面多饰有斜向粗绳纹，既增加了陶管的摩擦力，便于搬运和施工，也有一定的装饰作用。",
+            "而在陶水管内面则有麻点、布纹或素面。",
+            "使用时将细端套入粗端，节节相套形成长管。",
+            "为了防止漏水，它的缝隙常常用瓦片来填住。",
+            "汉代陶水管在多地都有出土。",
+            "汉代陶水管的出土反映当时汉代社会的文明发展程度极高，经济实力雄厚。",
+            "汉代陶水管的出土具有主要意义。"
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const gameBoard = document.getElementById('gameBoard');
+            const pipesContainer = document.getElementById('pipesContainer');
+            const checkBtn = document.getElementById('checkBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const statusMessage = document.getElementById('statusMessage');
+            const levelInfo = document.getElementById('levelInfo');
+            const successModal = document.getElementById('successModal');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalNextBtn = document.getElementById('modalNextBtn');
+            
+            let levelCompleted = false;
+            let currentLevel = 0;
+            let levels = [];
+            let availablePipes = { straight: 0, curved: 0 };
+            let placedPipes = 0;
+            let minPipesRequired = 0;
+            
+            /**
+             * 创建管道元素
+             */
+            function createPipeElement(type, isDraggable = false) {
+                const pipe = document.createElement('div');
+                pipe.className = `pipe`;
+                pipe.dataset.type = type;
+                pipe.dataset.rotation = 0;
+                
+                if (pipeImages[type]) {
+                    pipe.style.backgroundImage = `url(${pipeImages[type]})`;
+                } else {
+                    pipe.style.backgroundColor = type === 'straight' ? '#7D9EA8' : '#8C7B6B';
+                    pipe.style.borderRadius = '5px';
+                }
+                
+                const indicator = document.createElement('div');
+                indicator.className = 'rotation-indicator';
+                indicator.textContent = '1';
+                pipe.appendChild(indicator);
+                
+                if (isDraggable) {
+                    pipe.style.cursor = 'grab';
+                    pipe.draggable = true;
+                    pipe.addEventListener('dragstart', handleDragStart);
+                    pipe.querySelector('.rotation-indicator').style.display = 'none';
+                } else {
+                    pipe.addEventListener('click', function(e) {
+                        if (!e.target.classList.contains('remove-btn')) {
+                            rotatePipe(this);
+                        }
+                    });
+                }
+                
+                return pipe;
+            }
+            
+            /**
+             * 创建障碍元素
+             */
+            function createObstacleElement() {
+                const obstacle = document.createElement('div');
+                obstacle.className = 'obstacle';
+                
+                if (pipeImages.obstacle) {
+                    obstacle.style.backgroundImage = `url(${pipeImages.obstacle})`;
+                } else {
+                    obstacle.style.backgroundColor = '#5C4A3E';
+                    obstacle.style.borderRadius = '5px';
+                }
+                
+                return obstacle;
+            }
+            
+            /**
+             * 生成10个难度递增的关卡，每关包含多条预设路径
+             */
+            function generateLevels() {
+                levels = [];
+                
+                for (let i = 0; i < 10; i++) {
+                    const rows = 5 + Math.floor(i / 3);
+                    const cols = 5 + Math.floor(i / 2);
+                    const layout = Array(rows).fill().map(() => Array(cols).fill(''));
+                    
+                    // 随机选择起点位置（第一列）
+                    const startRow = Math.floor(Math.random() * rows);
+                    layout[startRow][0] = 'source';
+                    
+                    // 随机选择终点位置（最后一列）
+                    let endRow;
+                    do {
+                        endRow = Math.floor(Math.random() * rows);
+                    } while (endRow === startRow);
+                    layout[endRow][cols - 1] = 'end';
+                    
+                    // 生成多条预设路径（随关卡递增）
+                    const pathCount = Math.min(2 + Math.floor(i / 2), 5); // 最多5条路径
+                    const paths = [];
+                    
+                    // 生成不同类型的路径
+                    for (let p = 0; p < pathCount; p++) {
+                        let path;
+                        // 生成不同策略的路径，增加多样性
+                        switch(p % 3) {
+                            case 0:
+                                // 策略1: 先横后纵
+                                path = generatePath(startRow, 0, endRow, cols - 1, rows, cols, 'horizontal-first');
+                                break;
+                            case 1:
+                                // 策略2: 先纵后横
+                                path = generatePath(startRow, 0, endRow, cols - 1, rows, cols, 'vertical-first');
+                                break;
+                            case 2:
+                                // 策略3: 蛇形路径（增加长度）
+                                path = generatePath(startRow, 0, endRow, cols - 1, rows, cols, 'snake');
+                                break;
+                        }
+                        paths.push(path);
+                    }
+                    
+                    // 计算最少需要的管道数量（取最短路径长度）
+                    const pathLengths = paths.map(p => p.length - 2);
+                    minPipesRequired = Math.min(...pathLengths);
+                    
+                    // 提供足够的管道，确保所有可能路径都能实现
+                    const extraPipes = Math.floor(minPipesRequired * (0.5 + 0.3 * Math.random()));
+                    const totalPipes = minPipesRequired + extraPipes;
+                    
+                    // 弯管比例随关卡提升
+                    const straightCount = Math.floor(totalPipes * (0.7 - i * 0.05));
+                    const curvedCount = totalPipes - straightCount;
+                    
+                    // 随机关卡增加障碍数量
+                    const totalCells = rows * cols;
+                    const maxObstacles = Math.min(3 + Math.floor(i / 2), Math.floor(totalCells * 0.2));
+                    
+                    // 放置障碍（确保不阻塞所有路径）
+                    placeObstacles(layout, paths, maxObstacles, rows, cols);
+                    
+                    levels.push({
+                        layout,
+                        rows,
+                        cols,
+                        paths, // 存储多条路径
+                        straightCount,
+                        curvedCount,
+                        minPipesRequired,
+                        obstacleCount: maxObstacles,
+                        pathCount: paths.length // 记录路径数量
+                    });
+                }
+            }
+            
+            /**
+             * 生成从起点到终点的路径（支持多种策略）
+             * @param {string} strategy - 路径生成策略
+             */
+            function generatePath(startRow, startCol, endRow, endCol, rows, cols, strategy) {
+                const path = [{row: startRow, col: startCol}];
+                let currentRow = startRow;
+                let currentCol = startCol;
+                
+                switch(strategy) {
+                    case 'horizontal-first':
+                        // 先横向移动到终点列，再纵向移动到终点行
+                        while (currentCol < endCol) {
+                            currentCol++;
+                            path.push({row: currentRow, col: currentCol});
+                        }
+                        while (currentRow !== endRow) {
+                            currentRow += currentRow < endRow ? 1 : -1;
+                            path.push({row: currentRow, col: currentCol});
+                        }
+                        break;
+                        
+                    case 'vertical-first':
+                        // 先纵向移动到终点行，再横向移动到终点列
+                        while (currentRow !== endRow) {
+                            currentRow += currentRow < endRow ? 1 : -1;
+                            path.push({row: currentRow, col: currentCol});
+                        }
+                        while (currentCol < endCol) {
+                            currentCol++;
+                            path.push({row: currentRow, col: currentCol});
+                        }
+                        break;
+                        
+                    case 'snake':
+                        // 蛇形路径（增加横向摆动）
+                        const midCol = Math.floor((startCol + endCol) / 2);
+                        const swingAmount = Math.max(1, Math.floor((endCol - startCol) / 5));
+                        
+                        // 先到中间列
+                        while (currentCol < midCol) {
+                            currentCol++;
+                            path.push({row: currentRow, col: currentCol});
+                        }
+                        
+                        // 蛇形摆动
+                        let direction = 1; // 1: 向下, -1: 向上
+                        for (let i = 0; i < 2; i++) { // 两次摆动
+                            for (let j = 0; j < swingAmount; j++) {
+                                currentRow += direction;
+                                // 确保不超出边界
+                                if (currentRow >= 0 && currentRow < rows) {
+                                    path.push({row: currentRow, col: currentCol});
+                                } else {
+                                    currentRow -= direction; // 超出边界则取消移动
+                                    break;
+                                }
+                            }
+                            direction *= -1; // 改变方向
+                            currentCol++;
+                            path.push({row: currentRow, col: currentCol});
+                        }
+                        
+                        // 完成剩余横向移动
+                        while (currentCol < endCol) {
+                            currentCol++;
+                            path.push({row: currentRow, col: currentCol});
+                        }
+                        
+                        // 最后调整到终点行
+                        while (currentRow !== endRow) {
+                            currentRow += currentRow < endRow ? 1 : -1;
+                            path.push({row: currentRow, col: currentCol});
+                        }
+                        break;
+                }
+                
+                return path;
+            }
+            
+            /**
+             * 在关卡中放置障碍（确保不阻塞所有路径）
+             */
+            function placeObstacles(layout, paths, count, rows, cols) {
+                // 将所有路径位置存入集合
+                const allPathPositions = new Set();
+                paths.forEach(path => {
+                    path.forEach(pos => {
+                        allPathPositions.add(`${pos.row},${pos.col}`);
+                    });
+                });
+                
+                // 为每条路径创建位置集合
+                const pathPositionSets = paths.map(path => {
+                    const set = new Set();
+                    path.forEach(pos => set.add(`${pos.row},${pos.col}`));
+                    return set;
+                });
+                
+                let placedObstacles = 0;
+                const placedPositions = new Set();
+                
+                // 尝试放置指定数量的障碍
+                while (placedObstacles < count) {
+                    const row = Math.floor(Math.random() * rows);
+                    const col = Math.floor(Math.random() * cols);
+                    const posKey = `${row},${col}`;
+                    
+                    // 确保不在起点、终点或任何路径的关键位置
+                    if (allPathPositions.has(posKey) || layout[row][col] !== '' || placedPositions.has(posKey)) {
+                        continue;
+                    }
+                    
+                    // 检查放置此障碍后是否还有至少一条完整路径
+                    let hasValidPath = false;
+                    for (const pathSet of pathPositionSets) {
+                        // 检查这条路径是否完全不包含此障碍位置
+                        if (!pathSet.has(posKey)) {
+                            hasValidPath = true;
+                            break;
+                        }
+                    }
+                    
+                    if (hasValidPath) {
+                        layout[row][col] = 'obstacle';
+                        placedObstacles++;
+                        placedPositions.add(posKey);
+                    }
+                }
+            }
+            
+            /**
+             * 初始化游戏
+             */
+            function initGame() {
+                successModal.classList.remove('show');
+                
+                gameBoard.innerHTML = '';
+                pipesContainer.innerHTML = '';
+                levelCompleted = false;
+                placedPipes = 0;
+                statusMessage.style.display = 'none';
+                
+                const level = levels[currentLevel];
+                const totalPipes = level.straightCount + level.curvedCount;
+                levelInfo.textContent = `关卡 ${currentLevel + 1}/10 - 可用管道: ${totalPipes} (最少需要: ${level.minPipesRequired}) - 障碍: ${level.obstacleCount} - 路径选择: ${level.pathCount}种`;
+                
+                availablePipes = {
+                    straight: level.straightCount,
+                    curved: level.curvedCount
+                };
+                
+                gameBoard.style.gridTemplateColumns = `repeat(${level.cols}, 1fr)`;
+                gameBoard.style.gridTemplateRows = `repeat(${level.rows}, 1fr)`;
+                
+                createPipeOptions();
+                createGameBoardCells(level);
+                
+                prevBtn.disabled = currentLevel === 0;
+            }
+            
+            /**
+             * 创建管道选项区
+             */
+            function createPipeOptions() {
+                pipesContainer.innerHTML = '';
+                
+                if (availablePipes.straight > 0) {
+                    const straightOption = document.createElement('div');
+                    straightOption.className = 'pipe-item';
+                    straightOption.dataset.type = 'straight';
+                    straightOption.dataset.count = availablePipes.straight;
+                    straightOption.appendChild(createPipeElement('straight', true));
+                    pipesContainer.appendChild(straightOption);
+                }
+                
+                if (availablePipes.curved > 0) {
+                    const curvedOption = document.createElement('div');
+                    curvedOption.className = 'pipe-item';
+                    curvedOption.dataset.type = 'curved';
+                    curvedOption.dataset.count = availablePipes.curved;
+                    curvedOption.appendChild(createPipeElement('curved', true));
+                    pipesContainer.appendChild(curvedOption);
+                }
+            }
+            
+            /**
+             * 创建游戏网格单元格
+             */
+            function createGameBoardCells(level) {
+                for (let row = 0; row < level.rows; row++) {
+                    for (let col = 0; col < level.cols; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        
+                        const cellType = level.layout[row][col];
+                        
+                        if (cellType === 'source') {
+                            const source = document.createElement('div');
+                            source.className = 'water-source';
+                            cell.appendChild(source);
+                            cell.classList.add('placed');
+                        }
+                        else if (cellType === 'end') {
+                            const endPoint = document.createElement('div');
+                            endPoint.className = 'end-point';
+                            cell.appendChild(endPoint);
+                            cell.classList.add('placed');
+                        }
+                        else if (cellType === 'obstacle') {
+                            cell.appendChild(createObstacleElement());
+                            cell.classList.add('obstacle');
+                        }
+                        else {
+                            cell.classList.add('empty');
+                            cell.addEventListener('dragover', handleDragOver);
+                            cell.addEventListener('dragenter', handleDragEnter);
+                            cell.addEventListener('dragleave', handleDragLeave);
+                            cell.addEventListener('drop', handleDrop);
+                        }
+                        
+                        gameBoard.appendChild(cell);
+                    }
+                }
+            }
+            
+            // ---------------------- 拖拽相关函数 ----------------------
+            function handleDragStart(e) {
+                const pipeType = e.target.parentElement.dataset.type;
+                e.dataTransfer.setData('text/plain', pipeType);
+            }
+            
+            function handleDragOver(e) {
+                if (!e.target.classList.contains('obstacle') && !e.target.parentElement?.classList.contains('obstacle')) {
+                    e.preventDefault();
+                }
+            }
+            
+            function handleDragEnter(e) {
+                if (!e.target.classList.contains('obstacle') && !e.target.parentElement?.classList.contains('obstacle')) {
+                    e.preventDefault();
+                    e.target.classList.add('drag-over');
+                }
+            }
+            
+            function handleDragLeave(e) {
+                e.target.classList.remove('drag-over');
+            }
+            
+            function handleDrop(e) {
+                if (e.target.classList.contains('obstacle') || e.target.parentElement?.classList.contains('obstacle')) {
+                    return;
+                }
+                
+                e.preventDefault();
+                e.target.classList.remove('drag-over');
+                
+                if (levelCompleted) return;
+                
+                const cell = e.target.classList.contains('cell') ? e.target : e.target.closest('.cell');
+                
+                if (cell.querySelector('.pipe')) {
+                    removePipeFromCell(cell);
+                }
+                
+                const pipeType = e.dataTransfer.getData('text/plain');
+                
+                if (availablePipes[pipeType] <= 0) return;
+                
+                if (!pipeImages[pipeType]) {
+                    showStatusMessage(`请先上传${pipeType === 'straight' ? '直管' : '弯管'}图片`, 'error');
+                    return;
+                }
+                
+                availablePipes[pipeType]--;
+                placedPipes++;
+                
+                updatePipeOptionDisplay(pipeType);
+                
+                const pipe = createPipeElement(pipeType);
+                const removeBtn = createRemoveButton();
+                cell.appendChild(removeBtn);
+                cell.appendChild(pipe);
+                cell.classList.remove('empty');
+                cell.classList.add('placed');
+                
+                removeCellDragEvents(cell);
+            }
+            
+            // ---------------------- 管道操作相关函数 ----------------------
+            function removePipeFromCell(cell) {
+                const pipe = cell.querySelector('.pipe');
+                if (!pipe) return;
+                
+                const pipeType = pipe.dataset.type;
+                
+                availablePipes[pipeType]++;
+                placedPipes--;
+                
+                const pipeOption = Array.from(pipesContainer.children).find(
+                    el => el.dataset.type === pipeType
+                );
+                if (pipeOption) {
+                    pipeOption.dataset.count = availablePipes[pipeType];
+                    pipeOption.style.opacity = '1';
+                    pipeOption.style.cursor = 'grab';
+                }
+                
+                cell.removeChild(pipe);
+                const removeBtn = cell.querySelector('.remove-btn');
+                if (removeBtn) {
+                    cell.removeChild(removeBtn);
+                }
+                
+                cell.classList.add('empty');
+                cell.classList.remove('placed');
+                addCellDragEvents(cell);
+            }
+            
+            function rotatePipe(pipe) {
+                if (levelCompleted) return;
+                
+                let rotation = parseInt(pipe.dataset.rotation);
+                rotation += 90;
+                if (rotation >= 360) rotation = 0;
+                
+                pipe.dataset.rotation = rotation;
+                pipe.style.transform = `rotate(${rotation}deg)`;
+                
+                const rotationCount = (rotation / 90) + 1;
+                pipe.querySelector('.rotation-indicator').textContent = rotationCount;
+            }
+            
+            // ---------------------- 辅助函数 ----------------------
+            function createRemoveButton() {
+                const removeBtn = document.createElement('div');
+                removeBtn.className = 'remove-btn';
+                removeBtn.innerHTML = '×';
+                removeBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    removePipeFromCell(e.target.parentElement);
+                });
+                return removeBtn;
+            }
+            
+            function updatePipeOptionDisplay(pipeType) {
+                const pipeOption = Array.from(pipesContainer.children).find(
+                    el => el.dataset.type === pipeType
+                );
+                if (pipeOption) {
+                    pipeOption.dataset.count = availablePipes[pipeType];
+                    if (availablePipes[pipeType] === 0) {
+                        pipeOption.style.opacity = '0.5';
+                        pipeOption.style.cursor = 'not-allowed';
+                    }
+                }
+            }
+            
+            function addCellDragEvents(cell) {
+                cell.addEventListener('dragover', handleDragOver);
+                cell.addEventListener('dragenter', handleDragEnter);
+                cell.addEventListener('dragleave', handleDragLeave);
+                cell.addEventListener('drop', handleDrop);
+            }
+            
+            function removeCellDragEvents(cell) {
+                cell.removeEventListener('dragover', handleDragOver);
+                cell.removeEventListener('dragenter', handleDragEnter);
+                cell.removeEventListener('dragleave', handleDragLeave);
+                cell.removeEventListener('drop', handleDrop);
+            }
+            
+            function showStatusMessage(message, type = 'success') {
+                statusMessage.textContent = message;
+                statusMessage.style.display = 'block';
+                statusMessage.style.backgroundColor = type === 'success' 
+                    ? 'rgba(94, 143, 94, 0.8)' 
+                    : 'rgba(180, 100, 80, 0.8)';
+                
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 3000);
+            }
+            
+            // ---------------------- 连通性检查相关函数 ----------------------
+            function checkConnectivity() {
+                if (levelCompleted) return;
+                
+                const level = levels[currentLevel];
+                if (placedPipes < level.minPipesRequired) {
+                    showStatusMessage(`需要至少放置 ${level.minPipesRequired} 个管道才能连通`, 'error');
+                    return;
+                }
+                
+                // 使用BFS检查是否存在任何有效路径
+                const visited = Array(level.rows).fill().map(() => Array(level.cols).fill(false));
+                const queue = [];
+                let startPos = null;
+                
+                // 找到起点位置
+                for (let row = 0; row < level.rows; row++) {
+                    for (let col = 0; col < level.cols; col++) {
+                        if (level.layout[row][col] === 'source') {
+                            startPos = {row, col};
+                            break;
+                        }
+                    }
+                    if (startPos) break;
+                }
+                
+                if (!startPos) return;
+                
+                queue.push(startPos);
+                visited[startPos.row][startPos.col] = true;
+                
+                while (queue.length > 0) {
+                    const current = queue.shift();
+                    
+                    // 到达终点，连通成功
+                    if (level.layout[current.row][current.col] === 'end') {
+                        completeLevel();
+                        return;
+                    }
+                    
+                    checkAdjacentCells(current, visited, queue);
+                }
+                
+                showStatusMessage('水路未连通，请调整管道位置或方向', 'error');
+            }
+            
+            function checkAdjacentCells(current, visited, queue) {
+                const directions = [
+                    {dr: -1, dc: 0}, // 上
+                    {dr: 1, dc: 0},  // 下
+                    {dr: 0, dc: -1}, // 左
+                    {dr: 0, dc: 1}   // 右
+                ];
+                
+                for (const dir of directions) {
+                    const newRow = current.row + dir.dr;
+                    const newCol = current.col + dir.dc;
+                    
+                    if (isValidCell(newRow, newCol) && !visited[newRow][newCol]) {
+                        const level = levels[currentLevel];
+                        if (level.layout[newRow][newCol] === 'obstacle') {
+                            continue;
+                        }
+                        
+                        if (isConnected(current, {row: newRow, col: newCol})) {
+                            visited[newRow][newCol] = true;
+                            queue.push({row: newRow, col: newCol});
+                        }
+                    }
+                }
+            }
+            
+            function isConnected(from, to) {
+                const fromCell = getCellByCoord(from.row, from.col);
+                const toCell = getCellByCoord(to.row, to.col);
+                
+                const rowDiff = to.row - from.row;
+                const colDiff = to.col - from.col;
+                
+                if (!checkCellConnection(fromCell, rowDiff, colDiff)) return false;
+                if (!checkCellConnection(toCell, -rowDiff, -colDiff)) return false;
+                
+                return true;
+            }
+            
+            function checkCellConnection(cell, rowDiff, colDiff) {
+                if (cell.querySelector('.water-source') || cell.querySelector('.end-point')) {
+                    return Math.abs(rowDiff) + Math.abs(colDiff) === 1;
+                }
+                
+                const pipe = cell.querySelector('.pipe');
+                if (!pipe) return false;
+                
+                const pipeType = pipe.dataset.type;
+                const rotation = parseInt(pipe.dataset.rotation);
+                
+                return isPipeConnectedToDirection(pipeType, rotation, rowDiff, colDiff);
+            }
+            
+            function isPipeConnectedToDirection(pipeType, rotation, rowDiff, colDiff) {
+                if (Math.abs(rowDiff) + Math.abs(colDiff) !== 1) return false;
+                
+                if (pipeType === 'straight') {
+                    if (rotation === 0 || rotation === 180) {
+                        return rowDiff === 0 && Math.abs(colDiff) === 1;
+                    } else {
+                        return colDiff === 0 && Math.abs(rowDiff) === 1;
+                    }
+                } else if (pipeType === 'curved') {
+                    switch(rotation) {
+                        case 0:
+                            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+                        case 90:
+                            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === -1);
+                        case 180:
+                            return (rowDiff === -1 && colDiff === 0) || (rowDiff === 0 && colDiff === -1);
+                        case 270:
+                            return (rowDiff === -1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+                        default:
+                            return false;
+                    }
+                }
+                
+                return false;
+            }
+            
+            // ---------------------- 关卡控制相关函数 ----------------------
+            function completeLevel() {
+                levelCompleted = true;
+                
+                modalMessage.textContent = levelMessages[currentLevel];
+                
+                // 显示弹窗和特效
+                successModal.classList.add('show');
+                
+                if (currentLevel === levels.length - 1) {
+                    modalNextBtn.textContent = "重新开始";
+                } else {
+                    modalNextBtn.textContent = "点击进入下一关";
+                }
+            }
+            
+            function goToNextLevel() {
+                if (currentLevel === levels.length - 1) {
+                    currentLevel = 0;
+                } else {
+                    currentLevel++;
+                }
+                initGame();
+            }
+            
+            // ---------------------- 工具函数 ----------------------
+            function getCellByCoord(row, col) {
+                return document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+            }
+            
+            function isValidCell(row, col) {
+                const level = levels[currentLevel];
+                return row >= 0 && row < level.rows && col >= 0 && col < level.cols;
+            }
+            
+            // ---------------------- 事件监听绑定 ----------------------
+            checkBtn.addEventListener('click', checkConnectivity);
+            resetBtn.addEventListener('click', function() {
+                initGame();
+            });
+            prevBtn.addEventListener('click', function() {
+                if (currentLevel > 0) {
+                    currentLevel--;
+                    initGame();
+                }
+            });
+            modalNextBtn.addEventListener('click', goToNextLevel);
+            
+            // 初始化游戏
+            generateLevels();
+            initGame();
+        });
+        
+        // ---------------------- 图片上传相关函数 ----------------------
+        function handleImageUpload(type, fileInput) {
+            const file = fileInput.files[0];
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                alert('请上传图片文件（JPG、PNG等）');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                pipeImages[type] = e.target.result;
+                
+                const previewElement = document.getElementById(`${type}Preview`);
+                previewElement.innerHTML = `<img src="${e.target.result}" alt="${
+                    type === 'straight' ? '直管' : type === 'curved' ? '弯管' : '障碍'
+                }">`;
+                
+                if (type === 'obstacle') {
+                    updateAllObstaclesImage();
+                } else {
+                    updateAllPipesImage(type);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function updateAllPipesImage(pipeType) {
+            const pipes = document.querySelectorAll(`.pipe[data-type="${pipeType}"]`);
+            pipes.forEach(pipe => {
+                pipe.style.backgroundImage = `url(${pipeImages[pipeType]})`;
+                pipe.style.backgroundColor = 'transparent';
+            });
+        }
+        
+        function updateAllObstaclesImage() {
+            const obstacles = document.querySelectorAll('.obstacle');
+            obstacles.forEach(obstacle => {
+                obstacle.style.backgroundImage = `url(${pipeImages.obstacle})`;
+                obstacle.style.backgroundColor = 'transparent';
+            });
+        }
+    </script>
+</body>
+</html>
